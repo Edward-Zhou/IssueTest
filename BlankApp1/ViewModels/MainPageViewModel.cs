@@ -30,7 +30,8 @@ namespace BlankApp1.ViewModels
 {
     public class MainPageViewModel : ViewModelBase
     {
-        public MainPageViewModel(INavigationService navigationService)
+        public MainPageViewModel(INavigationService navigationService,
+            IService service)
             : base(navigationService)
         {
             Title = "Main Page";
@@ -48,7 +49,7 @@ namespace BlankApp1.ViewModels
             brush.VerticalAlignmentRatio = 0.5f;
             brush.Stretch = CompositionStretch.Uniform;
             visual.Brush = brush;
-
+            _service = service;
         }
 
         #region Capture API objects
@@ -246,25 +247,14 @@ namespace BlankApp1.ViewModels
         }
 
         private DelegateCommand _newWindow;
+        private readonly IService _service;
 
         public DelegateCommand NewWindow =>
             _newWindow ?? (_newWindow = new DelegateCommand(ExecuteNewWindow));
 
         async void ExecuteNewWindow()
         {
-            CoreApplicationView newView = CoreApplication.CreateNewView();
-            int newViewId = 0;
-            await newView.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-            {
-                Frame frame = new Frame();
-                frame.Navigate(typeof(MainPage));
-                Window.Current.Content = frame;
-                // You have to activate the window in order to show it later.
-                Window.Current.Activate();
-
-                newViewId = ApplicationView.GetForCurrentView().Id;
-            });
-            bool viewShown = await ApplicationViewSwitcher.TryShowAsStandaloneAsync(newViewId);
+            await _service.NewWindow(); ;
         }
     }
 
